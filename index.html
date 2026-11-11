@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Junções Hub</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#00419f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Junções Hub">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -213,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarListeners();
     atualizarStatusConexao();
     verificarSessaoPendente();
+    registrarServiceWorker();
 });
 
 function aplicarLogo() {
@@ -642,6 +648,13 @@ function baixarLogHoje() {
     a.href = url; a.download = `log_juncao_cargas_${dataAtualArquivo()}.txt`; a.click();
     URL.revokeObjectURL(url);
     adicionarLog(`Log do dia ${hoje} baixado por ${operador}`);
+}
+function registrarServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('Service Worker registrado'))
+            .catch(err => console.log('Erro no SW:', err));
+    }
 }
 </script>
 </body>
