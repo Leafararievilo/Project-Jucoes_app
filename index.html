@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Junções Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; overscroll-behavior: none; }
+  input, button, select { font-size: 16px; }
+  .gradient-header { background: linear-gradient(135deg, #0e2b63 0%, #00419f 60%, #00b1eb 100%); }
+  .rainbow-bar { height: 6px; background: linear-gradient(90deg, #ef7d00, #ffbb00, #50af47, #afca0b, #00b1eb, #5a328a, #e72582); }
+  .glow-btn { background: linear-gradient(135deg, #00419f, #0e2b63); box-shadow: 0 8px 20px rgba(0,65,159,0.35); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .glow-btn:active { transform: scale(0.97); box-shadow: 0 4px 10px rgba(0,65,159,0.3); }
+  .logo-ring { background: conic-gradient(#ef7d00, #ffbb00, #50af47, #afca0b, #00b1eb, #5a328a, #e72582, #ef7d00); padding: 4px; border-radius: 9999px; }
+  .pulse-dot { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(80,175,71,0.6); } 50% { box-shadow: 0 0 0 6px rgba(80,175,71,0); } }
+  .fade-in { animation: fadeIn 0.6s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .hidden-section { display: none !important; }
+  #lista-caixas { max-height: 320px; overflow-y: auto; }
+  .caixa-item { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 0.5rem; padding: 0.75rem 1rem; animation: slideIn 0.2s ease-out; }
+  .caixa-item span { font-weight: 700; color: #166534; font-size: 1.05rem; word-break: break-all; }
+  .btn-excluir { background-color: #ef4444; color: white; border: none; border-radius: 0.375rem; padding: 0.375rem 0.75rem; font-size: 0.7rem; font-weight: 700; margin-left: 0.5rem; flex-shrink: 0; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .toast { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background-color: #1f2937; color: white; padding: 0.875rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 50; max-width: 90%; text-align: center; animation: toastIn 0.3s ease-out; }
+  .toast.sucesso { background-color: #15803d; }
+  .toast.erro { background-color: #b91c1c; }
+  .toast.aviso { background-color: #b45309; }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+</style>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 min-h-screen flex flex-col">
+<div id="app" class="max-w-md mx-auto bg-white min-h-screen w-full flex flex-col shadow-2xl">
+
+  <!-- HEADER -->
+  <header class="gradient-header text-white shadow-lg sticky top-0 z-10">
+    <div class="flex items-center justify-between px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div class="logo-ring">
+          <div class="bg-white rounded-full w-12 h-12 flex items-center justify-center overflow-hidden">
+            <!-- IMAGEM 1/3: Logo header (36x36) -->
+            <img id="logo-header" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo Junções Hub" class="w-9 h-9 object-contain">
+          </div>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight leading-none">APP JUNÇÕES</h1>
+          <p class="text-xs text-blue-100 font-medium">Gerenciamento de Junçoes de Cargas </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
+        </span>
+        <span id="status-conexao" class="text-xs font-bold">ONLINE</span>
+      </div>
+    </div>
+    <div class="rainbow-bar"></div>
+  </header>
+
+  <main class="flex-1 px-5 py-6 space-y-4">
+
+    <!-- LOGIN -->
+    <section id="secao-login" class="fade-in flex flex-col justify-center min-h-[65vh]">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-28 h-28 rounded-3xl bg-white shadow-xl flex items-center justify-center mb-4 border-4 border-[#00b1eb]/20">
+          <!-- IMAGEM 2/3: Logo login (80x80) -->
+          <img id="logo-login" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo Junções Hub" class="w-20 h-20 object-contain">
+        </div>
+        <h2 class="text-2xl font-bold text-[#0e2b63] text-center">Bem-vindo(a) 👋</h2>
+        <p class="text-slate-500 text-sm text-center mt-1">Registre e acompanhe suas junções de cargas por BR.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100">
+        <label class="block text-sm font-bold text-[#0e2b63] mb-2" for="operador">Nome do operador</label>
+        <div class="relative mb-5">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </span>
+          <input id="operador" type="text" placeholder="Digite seu nome"
+            autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+            class="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-[#00b1eb] focus:ring-4 focus:ring-[#00b1eb]/15 outline-none transition text-slate-700 font-medium uppercase"/>
+        </div>
+
+        <button onclick="entrar()" class="glow-btn w-full text-white font-bold py-4 rounded-xl tracking-wide text-base flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          </svg>
+          ENTRAR
+        </button>
+      </div>
+
+      <div class="mt-4 bg-[#ffbb00]/10 border border-[#ffbb00]/40 rounded-xl p-3 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#ef7d00] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-xs text-slate-600">Dica: ao reabrir o app, você poderá <b>continuar</b> uma sessão pendente ou iniciar uma nova.</p>
+      </div>
+    </section>
+
+    <!-- SESSÃO PENDENTE -->
+    <section id="secao-sessao-pendente" class="hidden-section space-y-4">
+      <div class="bg-yellow-50 border-2 border-yellow-400 p-5 rounded-2xl">
+        <h2 class="text-lg font-bold text-yellow-800 mb-2">Sessão anterior encontrada</h2>
+        <p class="text-sm text-yellow-700 mb-4">
+          Existem <span id="sessao-pendente-contagem" class="font-bold">0</span> registro(s) não enviado(s).
+        </p>
+        <button onclick="continuarSessao()" class="w-full bg-blue-700 text-white p-4 rounded-xl font-bold mb-2 text-lg">▶ CONTINUAR DE ONDE PAROU</button>
+        <button onclick="iniciarNovaSessao()" class="w-full bg-orange-500 text-white p-4 rounded-xl font-bold text-lg">✕ INICIAR NOVA SESSÃO</button>
+      </div>
+    </section>
+
+    <!-- OPERAÇÃO -->
+    <section id="secao-operacao" class="hidden-section space-y-4">
+
+      <div id="box-br">
+        <label class="block text-sm font-bold mb-1 text-[#0e2b63]">BR (Carro)</label>
+        <input type="text" id="br-input"
+          class="w-full border-2 border-blue-300 p-4 rounded-xl text-center text-2xl font-bold uppercase"
+          placeholder="DIGITE OU LEIA O BR"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button onclick="lerQRBR()" id="btn-ler-qr-br" class="w-full bg-indigo-600 text-white p-3 rounded-xl font-bold mt-2">📷 LER QR CODE DO BR</button>
+        <button onclick="travarBR()" class="glow-btn w-full text-white p-4 rounded-xl font-bold mt-2 text-lg">🔒 TRAVAR BR</button>
+      </div>
+
+      <div id="box-br-travado" class="hidden-section bg-blue-50 p-4 rounded-xl">
+        <p class="text-sm text-blue-600">BR atual</p>
+        <p class="font-bold text-2xl text-blue-800" id="br-atual"></p>
+        <button onclick="trocarBR()" class="w-full bg-orange-500 text-white p-3 rounded-xl font-bold mt-3">🔄 TROCAR BR</button>
+      </div>
+
+      <div id="box-leitura-caixa" class="hidden-section">
+        <label class="block text-sm font-bold mb-1 text-[#0e2b63]">Caixa / Pedido</label>
+        <input type="text" id="input-caixa"
+          class="w-full border-2 border-green-300 p-4 rounded-xl text-center text-2xl font-bold uppercase"
+          placeholder="LEIA OU DIGITE O CÓDIGO"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <p class="text-xs text-gray-500 mt-1">Leitor físico, QR Code ou digitação</p>
+        <button onclick="confirmarLeituraCaixa()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold mt-2 text-lg">➕ ADICIONAR CAIXA</button>
+        <button onclick="lerCodigoBarras()" id="btn-ler-caixa-camera" class="w-full bg-indigo-600 text-white p-3 rounded-xl font-bold mt-2">📷 LER COM CÂMERA</button>
+      </div>
+
+      <div id="area-leitor" class="hidden-section">
+        <label class="block text-sm font-bold mb-1">Câmera</label>
+        <div id="reader" class="w-full h-48 bg-black rounded-xl overflow-hidden"></div>
+        <button onclick="pararLeitor()" class="w-full bg-red-500 text-white p-3 rounded-xl font-bold mt-2">⏹ DESLIGAR CÂMERA</button>
+      </div>
+
+      <div>
+        <h2 class="font-bold mb-2 text-[#0e2b63]">Caixas neste BR: <span id="contador">0</span></h2>
+        <ul id="lista-caixas" class="space-y-2"></ul>
+      </div>
+
+      <button onclick="abrirRelatorio()" class="w-full bg-purple-700 text-white p-4 rounded-xl font-bold text-lg">📊 GERAR RELATÓRIO</button>
+      <button onclick="sair()" class="w-full bg-gray-200 text-gray-700 p-3 rounded-xl font-semibold">Sair</button>
+    </section>
+
+    <!-- RELATÓRIO -->
+    <section id="secao-relatorio" class="hidden-section space-y-4">
+      <h2 class="text-xl font-bold text-purple-800">Relatório de Junções</h2>
+      <div id="resumo-relatorio" class="bg-gray-50 p-3 rounded-xl text-sm space-y-1"></div>
+      <button onclick="baixarCSV()" class="w-full bg-gray-800 text-white p-4 rounded-xl font-bold">⬇ BAIXAR CSV</button>
+      <button onclick="baixarExcel()" class="w-full bg-green-700 text-white p-4 rounded-xl font-bold">⬇ BAIXAR EXCEL</button>
+      <button onclick="compartilharWhatsApp()" class="w-full bg-green-500 text-white p-4 rounded-xl font-bold">📲 COMPARTILHAR NO WHATSAPP</button>
+      <button onclick="compartilharEmail()" class="w-full bg-blue-500 text-white p-4 rounded-xl font-bold">✉ ENVIAR POR E-MAIL</button>
+      <button onclick="limparHistoricoManual()" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold">🗑 LIMPAR HISTÓRICO</button>
+      <button onclick="baixarLogHoje()" class="w-full bg-slate-600 text-white p-4 rounded-xl font-bold">📋 BAIXAR LOG DO DIA</button>
+      <button onclick="voltarOperacao()" class="w-full bg-gray-200 text-gray-700 p-3 rounded-xl font-semibold">Voltar</button>
+    </section>
+
+  </main>
+
+  <footer class="px-6 py-5 text-center border-t border-slate-200 bg-white">
+    <div class="flex items-center justify-center gap-2 mb-1">
+      <!-- IMAGEM 3/3: Logo footer (24x24) -->
+      <img id="logo-footer" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo App Junções" class="w-6 h-6 object-contain opacity-80">
+      <span class="text-xs text-slate-400 font-medium">By SPC TEAM</span>
+    </div>
+    <p class="text-[11px] text-slate-400">v1.0 • 100% offline</p>
+  </footer>
+</div>
+
+<script>
+// ================= CONFIGURAÇÕES =================
+// TROQUE AQUI: coloque a URL da sua logo (deixe null para manter o ícone padrão)
+const LOGO_URL = "https://raw.githubusercontent.com/Leafararievilo/imagem-projeto-app-juncoes/65adb569a9ec92d12c941f723f8fee466ada1f32/logo_juncoes.png";
+
+const STORAGE_KEY = "juncao_cargas_registros";
+const OPERADOR_KEY = "juncao_cargas_operador";
+const LOG_KEY = "juncao_cargas_log";
+const SESSAO_ATIVA_KEY = "juncao_sessao_ativa";
+const LOG_DIAS_RETENCAO = 45;
+
+let operador = "";
+let brAtual = "";
+let brTravado = false;
+let leitor = null;
+let leitorLigado = false;
+let telaAtual = "login";
+let registros = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    aplicarLogo();
+    carregarDados();
+    limparLogAntigo();
+    configurarListeners();
+    atualizarStatusConexao();
+    verificarSessaoPendente();
+});
+
+function aplicarLogo() {
+    if (!LOGO_URL) return;
+    const fallbacks = {
+        'logo-header':  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
+        'logo-login':   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
+        'logo-footer':  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E"
+    };
+    ['logo-header', 'logo-login', 'logo-footer'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.src = LOGO_URL;
+        el.onerror = function() {
+            if (fallbacks[this.id]) this.src = fallbacks[this.id];
+            this.onerror = null;
+        };
+    });
+}
+
+function configurarListeners() {
+    const inputCaixa = document.getElementById("input-caixa");
+    if (inputCaixa) {
+        inputCaixa.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); confirmarLeituraCaixa(); }
+        });
+        inputCaixa.addEventListener("blur", () => {
+            if (brTravado && telaAtual === "operacao") {
+                setTimeout(() => { if (telaAtual === "operacao") inputCaixa.focus(); }, 150);
+            }
+        });
+    }
+    const brInput = document.getElementById("br-input");
+    if (brInput) {
+        brInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); travarBR(); }
+        });
+    }
+    window.addEventListener('online', atualizarStatusConexao);
+    window.addEventListener('offline', atualizarStatusConexao);
+}
+
+function atualizarStatusConexao() {
+    const el = document.getElementById('status-conexao');
+    if (!el) return;
+    el.textContent = navigator.onLine ? 'ONLINE' : 'OFFLINE';
+}
+
+function mostrarTela(nome) {
+    const secoes = { login: "secao-login", sessaoPendente: "secao-sessao-pendente", operacao: "secao-operacao", relatorio: "secao-relatorio" };
+    Object.values(secoes).forEach(id => document.getElementById(id)?.classList.add("hidden-section"));
+    document.getElementById(secoes[nome])?.classList.remove("hidden-section");
+    telaAtual = nome;
+}
+
+// ================= LOGIN =================
+function entrar() {
+    const input = document.getElementById("operador");
+    const nome = input.value.trim().toUpperCase();
+    if (!nome) { mostrarToast("Digite seu nome", "aviso"); input.focus(); return; }
+    operador = nome;
+    localStorage.setItem(OPERADOR_KEY, operador);
+    mostrarTela("operacao");
+    adicionarLog(`Operador ${operador} iniciou sessão`);
+    document.getElementById("br-input")?.focus();
+}
+
+function sair() {
+    adicionarLog(`Operador ${operador} saiu da aplicação`);
+    localStorage.removeItem(OPERADOR_KEY);
+    localStorage.removeItem(SESSAO_ATIVA_KEY);
+    location.reload();
+}
+
+// ================= SESSÃO PENDENTE =================
+function verificarSessaoPendente() {
+    const operadorSalvo = localStorage.getItem(OPERADOR_KEY);
+    if (registros.length > 0) {
+        mostrarTela("sessaoPendente");
+        document.getElementById("sessao-pendente-contagem").textContent = registros.length;
+    } else if (operadorSalvo) {
+        const campo = document.getElementById("operador");
+        if (campo) campo.value = operadorSalvo;
+        mostrarTela("login");
+    } else {
+        mostrarTela("login");
+    }
+}
+
+function continuarSessao() {
+    const nomeInformado = prompt("Confirme seu nome para continuar a sessão:", localStorage.getItem(OPERADOR_KEY) || "");
+    if (!nomeInformado || !nomeInformado.trim()) { mostrarToast("Nome é obrigatório para continuar", "aviso"); return; }
+    operador = nomeInformado.trim().toUpperCase();
+    localStorage.setItem(OPERADOR_KEY, operador);
+
+    const sessaoSalva = carregarSessaoAtiva();
+    if (sessaoSalva && sessaoSalva.brTravado) {
+        brAtual = sessaoSalva.brAtual;
+        brTravado = true;
+        document.getElementById("box-br").classList.add("hidden-section");
+        document.getElementById("box-br-travado").classList.remove("hidden-section");
+        document.getElementById("br-atual").textContent = brAtual;
+        document.getElementById("box-leitura-caixa").classList.remove("hidden-section");
+    }
+
+    mostrarTela("operacao");
+    adicionarLog(`Sessão anterior continuada por ${operador}. ${registros.length} registro(s) pendente(s)`);
+    renderizarCaixas();
+    if (brTravado) setTimeout(() => document.getElementById("input-caixa")?.focus(), 200);
+    else document.getElementById("br-input")?.focus();
+}
+
+function iniciarNovaSessao() {
+    if (!confirm("Tem certeza que deseja iniciar uma nova sessão? Os registros anteriores serão apagados.")) return;
+    adicionarLog(`Nova sessão iniciada. ${registros.length} registro(s) anterior(es) removido(s)`);
+    registros = [];
+    salvarDados();
+    limparSessaoAtiva();
+    localStorage.removeItem(OPERADOR_KEY);
+    const campo = document.getElementById("operador");
+    if (campo) campo.value = "";
+    mostrarTela("login");
+}
+
+function salvarSessaoAtiva() {
+    try { localStorage.setItem(SESSAO_ATIVA_KEY, JSON.stringify({ brAtual, brTravado })); } catch (e) {}
+}
+function carregarSessaoAtiva() {
+    try { const d = localStorage.getItem(SESSAO_ATIVA_KEY); return d ? JSON.parse(d) : null; } catch (e) { return null; }
+}
+function limparSessaoAtiva() { localStorage.removeItem(SESSAO_ATIVA_KEY); }
+
+// ================= BR =================
+function travarBR() {
+    const input = document.getElementById("br-input");
+    const valor = input.value.trim().toUpperCase();
+    if (!valor) { mostrarToast("Informe o BR", "aviso"); input.focus(); return; }
+    brAtual = valor;
+    brTravado = true;
+    salvarSessaoAtiva();
+    adicionarLog(`BR ${brAtual} travado pelo operador ${operador}`);
+    document.getElementById("box-br").classList.add("hidden-section");
+    document.getElementById("box-br-travado").classList.remove("hidden-section");
+    document.getElementById("br-atual").textContent = brAtual;
+    document.getElementById("box-leitura-caixa").classList.remove("hidden-section");
+    renderizarCaixas();
+    setTimeout(() => document.getElementById("input-caixa")?.focus(), 200);
+}
+
+function trocarBR() {
+    if (!confirm("Deseja trocar de BR? Os dados já salvos não serão perdidos.")) return;
+    adicionarLog(`Troca de BR: ${brAtual} liberado pelo operador ${operador}`);
+    pararLeitor();
+    brTravado = false;
+    brAtual = "";
+    limparSessaoAtiva();
+    document.getElementById("box-br").classList.remove("hidden-section");
+    document.getElementById("box-br-travado").classList.add("hidden-section");
+    document.getElementById("box-leitura-caixa").classList.add("hidden-section");
+    document.getElementById("area-leitor").classList.add("hidden-section");
+    document.getElementById("br-input").value = "";
+    renderizarCaixas();
+    document.getElementById("br-input")?.focus();
+}
+
+// ================= LEITORES POR CÂMERA =================
+async function lerQRBR() {
+    if (leitorLigado) { await pararLeitor(); return; }
+    if (!window.Html5Qrcode) { mostrarToast("Biblioteca de câmera não carregada", "erro"); return; }
+    document.getElementById("area-leitor").classList.remove("hidden-section");
+    try {
+        leitor = new Html5Qrcode("reader");
+        leitorLigado = true;
+        await leitor.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
+            (codigo) => { document.getElementById("br-input").value = codigo.trim().toUpperCase(); pararLeitor(); mostrarToast("BR lido com sucesso", "sucesso"); },
+            () => {});
+    } catch (err) { pararLeitor(); mostrarToast("Erro ao acessar câmera: " + err.message, "erro"); }
+}
+
+async function lerCodigoBarras() {
+    if (leitorLigado) { await pararLeitor(); return; }
+    if (!brTravado) { mostrarToast("Trave o BR primeiro", "aviso"); return; }
+    if (!window.Html5Qrcode) { mostrarToast("Biblioteca de câmera não carregada", "erro"); return; }
+    document.getElementById("area-leitor").classList.remove("hidden-section");
+    try {
+        leitor = new Html5Qrcode("reader");
+        leitorLigado = true;
+        await leitor.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 100 } },
+            (codigo) => { processarLeituraCaixa(codigo.trim()); pararLeitor(); },
+            () => {});
+    } catch (err) { pararLeitor(); mostrarToast("Erro ao acessar câmera: " + err.message, "erro"); }
+}
+
+async function pararLeitor() {
+    if (leitor && leitorLigado) {
+        try { await leitor.stop(); } catch (e) {}
+        leitor = null;
+        leitorLigado = false;
+    }
+    document.getElementById("area-leitor")?.classList.add("hidden-section");
+}
+
+// ================= LEITURA MANUAL =================
+function confirmarLeituraCaixa() {
+    const input = document.getElementById("input-caixa");
+    const codigo = input.value.trim().toUpperCase();
+    if (!codigo) { mostrarToast("Digite ou leia o código da caixa", "aviso"); input.focus(); return; }
+    processarLeituraCaixa(codigo);
+    input.value = "";
+    input.focus();
+}
+
+function processarLeituraCaixa(codigo) {
+    if (!codigo) return;
+    if (!brTravado) { mostrarToast("Trave o BR antes de ler caixas", "aviso"); return; }
+    const duplicado = registros.find(r => r.br === brAtual && r.caixa === codigo);
+    if (duplicado) { mostrarToast(`Caixa ${codigo} já registrada neste BR`, "aviso"); return; }
+    const existenteOutroBR = registros.find(r => r.br !== brAtual && r.caixa === codigo);
+    if (existenteOutroBR) {
+        if (confirm(`Caixa ${codigo} já registrada no BR ${existenteOutroBR.br} em ${existenteOutroBR.data} ${existenteOutroBR.hora}.\n\nDeseja mover para o BR ${brAtual}?`)) {
+            moverCaixaParaBR(existenteOutroBR.id, brAtual);
+        }
+        return;
+    }
+    const agora = new Date();
+    registros.push({ id: gerarId(), data: agora.toLocaleDateString("pt-BR"), hora: agora.toLocaleTimeString("pt-BR"), data_iso: agora.toISOString(), operador, br: brAtual, caixa: codigo });
+    salvarDados();
+    renderizarCaixas();
+    adicionarLog(`Caixa ${codigo} adicionada ao BR ${brAtual} pelo operador ${operador}`);
+    if (navigator.vibrate) navigator.vibrate(150);
+    mostrarToast(`Caixa ${codigo} adicionada`, "sucesso");
+}
+
+function moverCaixaParaBR(id, novoBR) {
+    const idx = registros.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    const agora = new Date();
+    registros[idx].br = novoBR;
+    registros[idx].operador = operador;
+    registros[idx].data = agora.toLocaleDateString("pt-BR");
+    registros[idx].hora = agora.toLocaleTimeString("pt-BR");
+    registros[idx].data_iso = agora.toISOString();
+    salvarDados();
+    renderizarCaixas();
+    mostrarToast(`Caixa movida para o BR ${novoBR}`, "sucesso");
+    adicionarLog(`Caixa ${registros[idx].caixa} movida para o BR ${novoBR} pelo operador ${operador}`);
+}
+
+function gerarId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+
+function renderizarCaixas() {
+    const lista = document.getElementById("lista-caixas");
+    lista.innerHTML = "";
+    const caixasBR = registros.filter(r => r.br === brAtual);
+    caixasBR.slice().reverse().forEach(r => {
+        const li = document.createElement("li");
+        li.className = "caixa-item";
+        const span = document.createElement("span");
+        span.textContent = r.caixa;
+        const btn = document.createElement("button");
+        btn.className = "btn-excluir";
+        btn.textContent = "REMOVER";
+        btn.addEventListener("click", () => removerCaixa(r.id));
+        li.appendChild(span);
+        li.appendChild(btn);
+        lista.appendChild(li);
+    });
+    document.getElementById("contador").textContent = caixasBR.length;
+}
+
+function removerCaixa(id) {
+    if (!confirm("Remover este registro?")) return;
+    const removido = registros.find(r => r.id === id);
+    registros = registros.filter(r => r.id !== id);
+    salvarDados();
+    renderizarCaixas();
+    mostrarToast("Registro removido", "sucesso");
+    if (removido) adicionarLog(`Caixa ${removido.caixa} removida do BR ${removido.br} pelo operador ${operador}`);
+}
+
+// ================= PERSISTÊNCIA =================
+function salvarDados() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(registros)); }
+    catch (e) { mostrarToast("Erro ao salvar dados (armazenamento cheio?)", "erro"); }
+}
+function carregarDados() {
+    try { const d = localStorage.getItem(STORAGE_KEY); if (d) registros = JSON.parse(d); }
+    catch (e) { registros = []; }
+}
+
+// ================= RELATÓRIO =================
+function abrirRelatorio() {
+    mostrarTela("relatorio");
+    pararLeitor();
+    const resumo = document.getElementById("resumo-relatorio");
+    resumo.innerHTML = "";
+    const agrupado = {};
+    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = { caixas: [] }; agrupado[r.br].caixas.push(r.caixa); });
+    if (Object.keys(agrupado).length === 0) { resumo.innerHTML = "<p>Nenhum registro ainda.</p>"; return; }
+    let html = `<p><strong>Total de BRs:</strong> ${Object.keys(agrupado).length}</p>`;
+    html += `<p><strong>Total de caixas:</strong> ${registros.length}</p><hr class="my-2 border-gray-300">`;
+    for (const br in agrupado) {
+        html += `<div class="mb-3"><p><strong>BR ${escaparHTML(br)}</strong> — ${agrupado[br].caixas.length} caixa(s)</p><p class="text-gray-600 break-all text-xs">${agrupado[br].caixas.map(escaparHTML).join(", ")}</p></div>`;
+    }
+    resumo.innerHTML = html;
+}
+function escaparHTML(str) { const div = document.createElement("div"); div.textContent = str; return div.innerHTML; }
+
+function voltarOperacao() {
+    mostrarTela("operacao");
+    renderizarCaixas();
+    if (brTravado) setTimeout(() => document.getElementById("input-caixa")?.focus(), 200);
+}
+
+// ================= EXPORTAÇÃO =================
+function prepararDadosExportacao() {
+    return registros.map(r => ({ Data: r.data, Hora: r.hora, Operador: r.operador, BR: r.br, Caixa_Pedido: r.caixa }));
+}
+function baixarCSV() {
+    if (registros.length === 0) { mostrarToast("Nenhum registro para exportar", "aviso"); return; }
+    const csv = converterParaCSV(prepararDadosExportacao());
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    if (typeof saveAs === "function") saveAs(blob, `juncao_cargas_${dataAtualArquivo()}.csv`);
+    else { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `juncao_cargas_${dataAtualArquivo()}.csv`; a.click(); URL.revokeObjectURL(url); }
+    adicionarLog(`Relatório CSV exportado por ${operador}. ${registros.length} registro(s)`);
+}
+function converterParaCSV(dados) {
+    if (dados.length === 0) return "";
+    const escapar = (v) => { const s = String(v ?? ""); return (s.includes(";") || s.includes("\n") || s.includes('"')) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const cabecalho = Object.keys(dados[0]).map(escapar).join(";");
+    const linhas = dados.map(o => Object.values(o).map(escapar).join(";"));
+    return [cabecalho, ...linhas].join("\n");
+}
+function baixarExcel() {
+    if (registros.length === 0) { mostrarToast("Nenhum registro para exportar", "aviso"); return; }
+    if (typeof XLSX === "undefined") { mostrarToast("Biblioteca Excel não carregada", "erro"); return; }
+    const ws = XLSX.utils.json_to_sheet(prepararDadosExportacao());
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Junções");
+    XLSX.writeFile(wb, `juncao_cargas_${dataAtualArquivo()}.xlsx`);
+    adicionarLog(`Relatório Excel exportado por ${operador}. ${registros.length} registro(s)`);
+}
+function dataAtualArquivo() {
+    const a = new Date();
+    return `${a.getFullYear()}${String(a.getMonth()+1).padStart(2,"0")}${String(a.getDate()).padStart(2,"0")}`;
+}
+function compartilharWhatsApp() {
+    if (registros.length === 0) { mostrarToast("Nenhum registro para compartilhar", "aviso"); return; }
+    window.open("https://wa.me/?text=" + encodeURIComponent(gerarTextoRelatorio()), "_blank");
+    adicionarLog(`Relatório compartilhado via WhatsApp por ${operador}`);
+}
+function compartilharEmail() {
+    if (registros.length === 0) { mostrarToast("Nenhum registro para compartilhar", "aviso"); return; }
+    const a = document.createElement("a");
+    a.href = `mailto:?subject=${encodeURIComponent("Junção de Cargas - " + dataAtualArquivo())}&body=${encodeURIComponent(gerarTextoRelatorio())}`;
+    a.target = "_blank";
+    document.body.appendChild(a); a.click(); a.remove();
+    adicionarLog(`Relatório compartilhado via e-mail por ${operador}`);
+}
+function gerarTextoRelatorio() {
+    const agrupado = {};
+    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = []; agrupado[r.br].push(r.caixa); });
+    let texto = `*Junção de Cargas*\nData: ${new Date().toLocaleDateString("pt-BR")}\nOperador: ${operador}\n\n`;
+    for (const br in agrupado) texto += `*BR: ${br}*\nCaixas: ${agrupado[br].length}\n${agrupado[br].join(", ")}\n\n`;
+    return texto;
+}
+
+// ================= UTILITÁRIOS =================
+function mostrarToast(mensagem, tipo = "sucesso") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${tipo}`;
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 2500);
+}
+
+function limparHistoricoManual() {
+    if (registros.length === 0) { mostrarToast("Não há registros para limpar", "aviso"); return; }
+    if (confirm("Tem certeza que deseja apagar todos os registros? Esta ação não pode ser desfeita.")) {
+        const qtd = registros.length;
+        registros = [];
+        salvarDados();
+        limparSessaoAtiva();
+        brAtual = ""; brTravado = false;
+        mostrarToast("Histórico limpo com sucesso", "sucesso");
+        voltarOperacao();
+        document.getElementById("box-br")?.classList.remove("hidden-section");
+        document.getElementById("box-br-travado")?.classList.add("hidden-section");
+        document.getElementById("box-leitura-caixa")?.classList.add("hidden-section");
+        adicionarLog(`Histórico limpo manualmente por ${operador}. ${qtd} registro(s) removido(s)`);
+    }
+}
+
+// ================= LOG =================
+function adicionarLog(mensagem) {
+    const agora = new Date();
+    const linha = `[${agora.toLocaleDateString("pt-BR")} ${agora.toLocaleTimeString("pt-BR")}] ${mensagem}`;
+    let log = [];
+    try { const d = localStorage.getItem(LOG_KEY); if (d) log = JSON.parse(d); } catch (e) {}
+    log.push(linha);
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch (e) {}
+}
+function limparLogAntigo() {
+    try {
+        const d = localStorage.getItem(LOG_KEY);
+        if (!d) return;
+        let log = JSON.parse(d);
+        const limite = new Date(); limite.setDate(limite.getDate() - LOG_DIAS_RETENCAO);
+        log = log.filter(linha => {
+            const m = linha.match(/^\[(\d{2})\/(\d{2})\/(\d{4})/);
+            if (!m) return true;
+            const [, dia, mes, ano] = m;
+            return new Date(`${ano}-${mes}-${dia}`) >= limite;
+        });
+        localStorage.setItem(LOG_KEY, JSON.stringify(log));
+    } catch (e) {}
+}
+function baixarLogHoje() {
+    const hoje = new Date().toLocaleDateString("pt-BR");
+    let log = [];
+    try { const d = localStorage.getItem(LOG_KEY); if (d) log = JSON.parse(d); } catch (e) { mostrarToast("Erro ao carregar log", "erro"); return; }
+    const logHoje = log.filter(l => l.includes(hoje));
+    if (logHoje.length === 0) { mostrarToast("Nenhum log para hoje", "aviso"); return; }
+    const blob = new Blob([logHoje.join("\n")], { type: "text/plain;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `log_juncao_cargas_${dataAtualArquivo()}.txt`; a.click();
+    URL.revokeObjectURL(url);
+    adicionarLog(`Log do dia ${hoje} baixado por ${operador}`);
+}
+</script>
+</body>
+</html>
