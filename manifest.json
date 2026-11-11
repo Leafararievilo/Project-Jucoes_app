@@ -1,13 +1,18 @@
 {
+  "id": "/app-juncoes/",
   "name": "Junções Hub - Gestão de Cargas",
-  "short_name": "Junções Hub",
+  "short_name": "Junções",
   "description": "Aplicativo offline para registro de junções de cargas por BR",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#0e2b63",
   "theme_color": "#00419f",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "./icon-192.png",
@@ -35,3 +40,4 @@
     }
   ]
 }
+
