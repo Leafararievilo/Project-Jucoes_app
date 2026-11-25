@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Junções Hub</title>
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#00419f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Junções Hub">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -22,14 +17,11 @@
   .glow-btn { background: linear-gradient(135deg, #00419f, #0e2b63); box-shadow: 0 8px 20px rgba(0,65,159,0.35); transition: transform 0.15s ease, box-shadow 0.15s ease; }
   .glow-btn:active { transform: scale(0.97); box-shadow: 0 4px 10px rgba(0,65,159,0.3); }
   .logo-ring { background: conic-gradient(#ef7d00, #ffbb00, #50af47, #afca0b, #00b1eb, #5a328a, #e72582, #ef7d00); padding: 4px; border-radius: 9999px; }
-  .pulse-dot { animation: pulse 2s infinite; }
-  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(80,175,71,0.6); } 50% { box-shadow: 0 0 0 6px rgba(80,175,71,0); } }
-  .fade-in { animation: fadeIn 0.6s ease-out; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .hidden-section { display: none !important; }
   #lista-caixas { max-height: 320px; overflow-y: auto; }
   .caixa-item { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 0.5rem; padding: 0.75rem 1rem; animation: slideIn 0.2s ease-out; }
   .caixa-item span { font-weight: 700; color: #166534; font-size: 1.05rem; word-break: break-all; }
+  .caixa-hora { font-size: 0.75rem; color: #15803d; margin-top: 0.15rem; }
   .btn-excluir { background-color: #ef4444; color: white; border: none; border-radius: 0.375rem; padding: 0.375rem 0.75rem; font-size: 0.7rem; font-weight: 700; margin-left: 0.5rem; flex-shrink: 0; }
   @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   .toast { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background-color: #1f2937; color: white; padding: 0.875rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 50; max-width: 90%; text-align: center; animation: toastIn 0.3s ease-out; }
@@ -37,6 +29,10 @@
   .toast.erro { background-color: #b91c1c; }
   .toast.aviso { background-color: #b45309; }
   @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  #toast-topo { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #15803d, #16a34a); color: white; padding: 0.75rem 1rem; font-weight: 700; font-size: 0.95rem; text-align: center; z-index: 100; box-shadow: 0 4px 15px rgba(21,128,61,0.3); transform: translateY(-100%); transition: transform 0.25s ease; pointer-events: none; }
+  #toast-topo.ativa { transform: translateY(0); }
+  #toast-topo .caixa { background: rgba(255,255,255,0.25); padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-weight: 800; }
+  #status-leitor { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; min-height: 1rem; }
 </style>
 </head>
 <body class="bg-gradient-to-b from-slate-50 to-slate-100 min-h-screen flex flex-col">
@@ -48,13 +44,12 @@
       <div class="flex items-center gap-3">
         <div class="logo-ring">
           <div class="bg-white rounded-full w-12 h-12 flex items-center justify-center overflow-hidden">
-            <!-- IMAGEM 1/3: Logo header (36x36) -->
             <img id="logo-header" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo Junções Hub" class="w-9 h-9 object-contain">
           </div>
         </div>
         <div>
           <h1 class="text-xl font-extrabold tracking-tight leading-none">APP JUNÇÕES</h1>
-          <p class="text-xs text-blue-100 font-medium">Gerenciamento de Junçoes de Cargas </p>
+          <p class="text-xs text-blue-100 font-medium">Gerenciamento de Junções de Cargas</p>
         </div>
       </div>
       <div class="flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">
@@ -71,10 +66,9 @@
   <main class="flex-1 px-5 py-6 space-y-4">
 
     <!-- LOGIN -->
-    <section id="secao-login" class="fade-in flex flex-col justify-center min-h-[65vh]">
+    <section id="secao-login" class="flex flex-col justify-center min-h-[65vh]">
       <div class="flex flex-col items-center mb-8">
         <div class="w-28 h-28 rounded-3xl bg-white shadow-xl flex items-center justify-center mb-4 border-4 border-[#00b1eb]/20">
-          <!-- IMAGEM 2/3: Logo login (80x80) -->
           <img id="logo-login" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo Junções Hub" class="w-20 h-20 object-contain">
         </div>
         <h2 class="text-2xl font-bold text-[#0e2b63] text-center">Bem-vindo(a) 👋</h2>
@@ -154,7 +148,8 @@
 
       <div id="area-leitor" class="hidden-section">
         <label class="block text-sm font-bold mb-1">Câmera</label>
-        <div id="reader" class="w-full h-48 bg-black rounded-xl overflow-hidden"></div>
+        <div id="reader" class="w-full h-64 bg-black rounded-xl overflow-hidden"></div>
+        <p id="status-leitor"></p>
         <button onclick="pararLeitor()" class="w-full bg-red-500 text-white p-3 rounded-xl font-bold mt-2">⏹ DESLIGAR CÂMERA</button>
       </div>
 
@@ -184,7 +179,6 @@
 
   <footer class="px-6 py-5 text-center border-t border-slate-200 bg-white">
     <div class="flex items-center justify-center gap-2 mb-1">
-      <!-- IMAGEM 3/3: Logo footer (24x24) -->
       <img id="logo-footer" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E" alt="Logo App Junções" class="w-6 h-6 object-contain opacity-80">
       <span class="text-xs text-slate-400 font-medium">By SPC TEAM</span>
     </div>
@@ -192,9 +186,13 @@
   </footer>
 </div>
 
+<!-- TOAST FINO NO TOPO -->
+<div id="toast-topo">
+  ✓ <span class="caixa"></span> <span class="mensagem">caixa registrada</span>
+</div>
+
 <script>
 // ================= CONFIGURAÇÕES =================
-// TROQUE AQUI: coloque a URL da sua logo (deixe null para manter o ícone padrão)
 const LOGO_URL = "https://raw.githubusercontent.com/Leafararievilo/imagem-projeto-app-juncoes/65adb569a9ec92d12c941f723f8fee466ada1f32/logo_juncoes.png";
 
 const STORAGE_KEY = "juncao_cargas_registros";
@@ -209,6 +207,8 @@ let brTravado = false;
 let leitor = null;
 let leitorLigado = false;
 let telaAtual = "login";
+let ultimoCodigoLido = "";
+let ultimoCodigoHora = 0;
 let registros = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -218,15 +218,14 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarListeners();
     atualizarStatusConexao();
     verificarSessaoPendente();
-    registrarServiceWorker();
 });
 
 function aplicarLogo() {
     if (!LOGO_URL) return;
     const fallbacks = {
-        'logo-header':  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
-        'logo-login':   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
-        'logo-footer':  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E"
+        'logo-header': "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
+        'logo-login': "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e2b63' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E",
+        'logo-footer': "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/%3E%3Cpolyline points='3.27 6.96 12 12.01 20.73 6.96'/%3E%3Cline x1='12' y1='22.08' x2='12' y2='12'/%3E%3C/svg%3E"
     };
     ['logo-header', 'logo-login', 'logo-footer'].forEach(id => {
         const el = document.getElementById(id);
@@ -384,18 +383,90 @@ function trocarBR() {
     document.getElementById("br-input")?.focus();
 }
 
-// ================= LEITORES POR CÂMERA =================
+// ================= LEITORES POR CÂMERA COM FALLBACK =================
+const FORMATOS_CAMERA = {
+    qrCode: true,
+    code128: true,
+    code39: true,
+    ean13: true,
+    ean8: true,
+    upca: true,
+    upce: true,
+    itf: true
+};
+
+function setStatusLeitor(texto) {
+    const el = document.getElementById("status-leitor");
+    if (el) el.textContent = texto || "";
+}
+
+async function obterCameraTraseira() {
+    try {
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) return null;
+        const traseira = devices.find(d => /back|rear|trás|tras|environment/i.test(d.label));
+        if (traseira) return { deviceId: { exact: traseira.id } };
+        const frontal = devices.find(d => /front|selfie|user/i.test(d.label));
+        if (frontal) return { deviceId: { exact: frontal.id } };
+        return { deviceId: { exact: devices[0].id } };
+    } catch (e) {
+        return null;
+    }
+}
+
 async function lerQRBR() {
     if (leitorLigado) { await pararLeitor(); return; }
     if (!window.Html5Qrcode) { mostrarToast("Biblioteca de câmera não carregada", "erro"); return; }
     document.getElementById("area-leitor").classList.remove("hidden-section");
+    setStatusLeitor("Inicializando câmera...");
     try {
+        let cameraConfig = await obterCameraTraseira();
+        if (!cameraConfig) cameraConfig = { facingMode: "environment" };
         leitor = new Html5Qrcode("reader");
         leitorLigado = true;
-        await leitor.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } },
-            (codigo) => { document.getElementById("br-input").value = codigo.trim().toUpperCase(); pararLeitor(); mostrarToast("BR lido com sucesso", "sucesso"); },
-            () => {});
-    } catch (err) { pararLeitor(); mostrarToast("Erro ao acessar câmera: " + err.message, "erro"); }
+        await leitor.start(
+            cameraConfig,
+            { fps: 15, qrbox: { width: 250, height: 150 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] },
+            (codigo) => {
+                document.getElementById("br-input").value = codigo.trim().toUpperCase();
+                setStatusLeitor("BR lido com sucesso");
+                mostrarToast("BR lido com sucesso", "sucesso");
+                setTimeout(pararLeitor, 600);
+            },
+            () => { setStatusLeitor("Aponte para o QR Code do BR"); }
+        );
+        setStatusLeitor("Aponte para o QR Code do BR");
+    } catch (err) {
+        if (err.name === "OverconstrainedError" || /overconstrained|not found|could not start|no camera/i.test(err.message || "")) {
+            setStatusLeitor("Tentando câmera alternativa...");
+            try {
+                if (leitor && leitorLigado) { try { await leitor.stop(); } catch (e) {} leitorLigado = false; }
+                leitor = new Html5Qrcode("reader");
+                leitorLigado = true;
+                await leitor.start(
+                    { facingMode: "user" },
+                    { fps: 15, qrbox: { width: 250, height: 150 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] },
+                    (codigo) => {
+                        document.getElementById("br-input").value = codigo.trim().toUpperCase();
+                        setStatusLeitor("BR lido com sucesso");
+                        mostrarToast("BR lido com sucesso", "sucesso");
+                        setTimeout(pararLeitor, 600);
+                    },
+                    () => { setStatusLeitor("Aponte para o QR Code do BR"); }
+                );
+                setStatusLeitor("Aponte para o QR Code do BR");
+                return;
+            } catch (err2) {
+                setStatusLeitor("");
+                pararLeitor();
+                mostrarToast("Nenhuma câmera disponível. Verifique as permissões.", "erro");
+                return;
+            }
+        }
+        setStatusLeitor("");
+        pararLeitor();
+        mostrarToast("Erro ao acessar câmera: " + (err.message || err), "erro");
+    }
 }
 
 async function lerCodigoBarras() {
@@ -403,13 +474,63 @@ async function lerCodigoBarras() {
     if (!brTravado) { mostrarToast("Trave o BR primeiro", "aviso"); return; }
     if (!window.Html5Qrcode) { mostrarToast("Biblioteca de câmera não carregada", "erro"); return; }
     document.getElementById("area-leitor").classList.remove("hidden-section");
+    setStatusLeitor("Inicializando câmera...");
     try {
+        let cameraConfig = await obterCameraTraseira();
+        if (!cameraConfig) cameraConfig = { facingMode: "environment" };
         leitor = new Html5Qrcode("reader");
         leitorLigado = true;
-        await leitor.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 100 } },
-            (codigo) => { processarLeituraCaixa(codigo.trim()); pararLeitor(); },
-            () => {});
-    } catch (err) { pararLeitor(); mostrarToast("Erro ao acessar câmera: " + err.message, "erro"); }
+        await leitor.start(
+            cameraConfig,
+            { fps: 15, qrbox: { width: 260, height: 120 }, formatsToSupport: Object.values(Html5QrcodeSupportedFormats).filter(f => f !== Html5QrcodeSupportedFormats.QR_CODE) },
+            (codigo) => {
+                const codigoLimpo = codigo.trim().toUpperCase();
+                if (evitarLeituraRepetida(codigoLimpo)) return;
+                setStatusLeitor(`Lido: ${codigoLimpo}`);
+                processarLeituraCaixa(codigoLimpo);
+            },
+            () => { setStatusLeitor("Aponte o código de barras da caixa"); }
+        );
+        setStatusLeitor("Aponte o código de barras da caixa");
+    } catch (err) {
+        if (err.name === "OverconstrainedError" || /overconstrained|not found|could not start|no camera/i.test(err.message || "")) {
+            setStatusLeitor("Tentando câmera alternativa...");
+            try {
+                if (leitor && leitorLigado) { try { await leitor.stop(); } catch (e) {} leitorLigado = false; }
+                leitor = new Html5Qrcode("reader");
+                leitorLigado = true;
+                await leitor.start(
+                    { facingMode: "user" },
+                    { fps: 15, qrbox: { width: 260, height: 120 }, formatsToSupport: Object.values(Html5QrcodeSupportedFormats).filter(f => f !== Html5QrcodeSupportedFormats.QR_CODE) },
+                    (codigo) => {
+                        const codigoLimpo = codigo.trim().toUpperCase();
+                        if (evitarLeituraRepetida(codigoLimpo)) return;
+                        setStatusLeitor(`Lido: ${codigoLimpo}`);
+                        processarLeituraCaixa(codigoLimpo);
+                    },
+                    () => { setStatusLeitor("Aponte o código de barras da caixa"); }
+                );
+                setStatusLeitor("Aponte o código de barras da caixa");
+                return;
+            } catch (err2) {
+                setStatusLeitor("");
+                pararLeitor();
+                mostrarToast("Nenhuma câmera disponível. Verifique as permissões.", "erro");
+                return;
+            }
+        }
+        setStatusLeitor("");
+        pararLeitor();
+        mostrarToast("Erro ao acessar câmera: " + (err.message || err), "erro");
+    }
+}
+
+function evitarLeituraRepetida(codigo) {
+    const agora = Date.now();
+    if (codigo === ultimoCodigoLido && (agora - ultimoCodigoHora) < 1500) return true;
+    ultimoCodigoLido = codigo;
+    ultimoCodigoHora = agora;
+    return false;
 }
 
 async function pararLeitor() {
@@ -419,6 +540,7 @@ async function pararLeitor() {
         leitorLigado = false;
     }
     document.getElementById("area-leitor")?.classList.add("hidden-section");
+    setStatusLeitor("");
 }
 
 // ================= LEITURA MANUAL =================
@@ -431,25 +553,38 @@ function confirmarLeituraCaixa() {
     input.focus();
 }
 
+// ================= PROCESSAMENTO DA CAIXA =================
 function processarLeituraCaixa(codigo) {
     if (!codigo) return;
     if (!brTravado) { mostrarToast("Trave o BR antes de ler caixas", "aviso"); return; }
+
     const duplicado = registros.find(r => r.br === brAtual && r.caixa === codigo);
     if (duplicado) { mostrarToast(`Caixa ${codigo} já registrada neste BR`, "aviso"); return; }
+
     const existenteOutroBR = registros.find(r => r.br !== brAtual && r.caixa === codigo);
     if (existenteOutroBR) {
         if (confirm(`Caixa ${codigo} já registrada no BR ${existenteOutroBR.br} em ${existenteOutroBR.data} ${existenteOutroBR.hora}.\n\nDeseja mover para o BR ${brAtual}?`)) {
             moverCaixaParaBR(existenteOutroBR.id, brAtual);
+            mostrarToastTopo(codigo, "CAIXA MOVIDA");
         }
         return;
     }
+
     const agora = new Date();
-    registros.push({ id: gerarId(), data: agora.toLocaleDateString("pt-BR"), hora: agora.toLocaleTimeString("pt-BR"), data_iso: agora.toISOString(), operador, br: brAtual, caixa: codigo });
+    registros.push({
+        id: gerarId(),
+        data: agora.toLocaleDateString("pt-BR"),
+        hora: agora.toLocaleTimeString("pt-BR"),
+        data_iso: agora.toISOString(),
+        operador,
+        br: brAtual,
+        caixa: codigo
+    });
     salvarDados();
     renderizarCaixas();
     adicionarLog(`Caixa ${codigo} adicionada ao BR ${brAtual} pelo operador ${operador}`);
-    if (navigator.vibrate) navigator.vibrate(150);
-    mostrarToast(`Caixa ${codigo} adicionada`, "sucesso");
+    if (navigator.vibrate) navigator.vibrate(80);
+    mostrarToastTopo(codigo, "CAIXA REGISTRADA");
 }
 
 function moverCaixaParaBR(id, novoBR) {
@@ -463,7 +598,6 @@ function moverCaixaParaBR(id, novoBR) {
     registros[idx].data_iso = agora.toISOString();
     salvarDados();
     renderizarCaixas();
-    mostrarToast(`Caixa movida para o BR ${novoBR}`, "sucesso");
     adicionarLog(`Caixa ${registros[idx].caixa} movida para o BR ${novoBR} pelo operador ${operador}`);
 }
 
@@ -476,13 +610,19 @@ function renderizarCaixas() {
     caixasBR.slice().reverse().forEach(r => {
         const li = document.createElement("li");
         li.className = "caixa-item";
+        const div = document.createElement("div");
         const span = document.createElement("span");
         span.textContent = r.caixa;
+        const hora = document.createElement("p");
+        hora.className = "caixa-hora";
+        hora.textContent = `Bipado às ${r.hora}`;
+        div.appendChild(span);
+        div.appendChild(hora);
         const btn = document.createElement("button");
         btn.className = "btn-excluir";
         btn.textContent = "REMOVER";
         btn.addEventListener("click", () => removerCaixa(r.id));
-        li.appendChild(span);
+        li.appendChild(div);
         li.appendChild(btn);
         lista.appendChild(li);
     });
@@ -516,12 +656,13 @@ function abrirRelatorio() {
     const resumo = document.getElementById("resumo-relatorio");
     resumo.innerHTML = "";
     const agrupado = {};
-    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = { caixas: [] }; agrupado[r.br].caixas.push(r.caixa); });
+    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = { caixas: [], operador: r.operador }; agrupado[r.br].caixas.push(r); });
     if (Object.keys(agrupado).length === 0) { resumo.innerHTML = "<p>Nenhum registro ainda.</p>"; return; }
     let html = `<p><strong>Total de BRs:</strong> ${Object.keys(agrupado).length}</p>`;
     html += `<p><strong>Total de caixas:</strong> ${registros.length}</p><hr class="my-2 border-gray-300">`;
     for (const br in agrupado) {
-        html += `<div class="mb-3"><p><strong>BR ${escaparHTML(br)}</strong> — ${agrupado[br].caixas.length} caixa(s)</p><p class="text-gray-600 break-all text-xs">${agrupado[br].caixas.map(escaparHTML).join(", ")}</p></div>`;
+        html += `<div class="mb-3"><p><strong>BR ${escaparHTML(br)}</strong> — ${agrupado[br].caixas.length} caixa(s)</p>`;
+        html += `<p class="text-gray-600 break-all text-xs">${agrupado[br].caixas.map(c => escaparHTML(c.caixa) + ` <small>(${c.hora})</small>`).join(", ")}</p></div>`;
     }
     resumo.innerHTML = html;
 }
@@ -580,9 +721,12 @@ function compartilharEmail() {
 }
 function gerarTextoRelatorio() {
     const agrupado = {};
-    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = []; agrupado[r.br].push(r.caixa); });
+    registros.forEach(r => { if (!agrupado[r.br]) agrupado[r.br] = []; agrupado[r.br].push(r); });
     let texto = `*Junção de Cargas*\nData: ${new Date().toLocaleDateString("pt-BR")}\nOperador: ${operador}\n\n`;
-    for (const br in agrupado) texto += `*BR: ${br}*\nCaixas: ${agrupado[br].length}\n${agrupado[br].join(", ")}\n\n`;
+    for (const br in agrupado) {
+        texto += `*BR: ${br}*\nCaixas: ${agrupado[br].length}\n`;
+        texto += `${agrupado[br].map(c => `${c.caixa} (${c.hora})`).join(", ")}\n\n`;
+    }
     return texto;
 }
 
@@ -593,6 +737,17 @@ function mostrarToast(mensagem, tipo = "sucesso") {
     toast.textContent = mensagem;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 2500);
+}
+
+function mostrarToastTopo(caixa, mensagem) {
+    const toast = document.getElementById("toast-topo");
+    if (!toast) return;
+    toast.querySelector(".caixa").textContent = caixa;
+    toast.querySelector(".mensagem").textContent = mensagem.toLowerCase();
+    toast.classList.add("ativa");
+    if (navigator.vibrate) navigator.vibrate(80);
+    if (window.toastTimeout) clearTimeout(window.toastTimeout);
+    window.toastTimeout = setTimeout(() => toast.classList.remove("ativa"), 1800);
 }
 
 function limparHistoricoManual() {
@@ -648,13 +803,6 @@ function baixarLogHoje() {
     a.href = url; a.download = `log_juncao_cargas_${dataAtualArquivo()}.txt`; a.click();
     URL.revokeObjectURL(url);
     adicionarLog(`Log do dia ${hoje} baixado por ${operador}`);
-}
-function registrarServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('Service Worker registrado'))
-            .catch(err => console.log('Erro no SW:', err));
-    }
 }
 </script>
 </body>
